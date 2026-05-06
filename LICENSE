@@ -1,0 +1,19 @@
+Copyright (c) 2026 mirrorpath. All rights reserved.
+
+This repository exists solely to host downloadable binary release
+artifacts of latch. The source code for latch is not open source and is
+not distributed via this repository or any other public channel.
+
+The binary release artifacts attached to GitHub Releases in this
+repository are proprietary software. They are made available for
+download for evaluation purposes during the latch private preview.
+
+Redistribution of binary artifacts outside the latch private preview
+channel requires prior written permission. Reverse engineering is not
+authorized. No warranty is provided; use at your own risk.
+
+The contents of this repository (this LICENSE, the README, and the
+install script) may be read and copied for the purpose of installing
+or evaluating latch.
+
+For full end-user terms, see the latch private preview documentation.
