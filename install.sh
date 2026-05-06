@@ -65,12 +65,21 @@ main() {
   export HOMEBREW_GITHUB_API_TOKEN="${LATCH_INSTALL_TOKEN}"
 
   if brew tap | grep -qx "${TAP}"; then
-    echo "Tap already installed: ${TAP}"
+    echo "Tap already installed: ${TAP} — refreshing to latest formula."
+    brew update --quiet "${TAP}" || brew update --quiet
   else
     brew tap "${TAP}" "${TAP_URL}"
   fi
 
-  brew install latch
+  # Use `reinstall` instead of `install` so a stale or pinned local install
+  # (e.g. installed before a release reset) gets replaced with whatever the
+  # refreshed tap currently points at, even if SemVer would call it a
+  # "downgrade" (which `brew upgrade` refuses).
+  if brew list latch >/dev/null 2>&1; then
+    brew reinstall latch
+  else
+    brew install latch
+  fi
 
   echo
   echo "Installed: $(brew --prefix)/bin/latch"
