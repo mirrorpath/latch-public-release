@@ -13,7 +13,7 @@
 set -euo pipefail
 
 TAP="mirrorpath/latch"
-TAP_URL="https://github.com/mirrorpath/homebrew-latch.git"
+TAP_REPO_PATH="mirrorpath/homebrew-latch"
 
 require_brew() {
   if ! command -v brew >/dev/null 2>&1; then
@@ -64,11 +64,26 @@ main() {
 
   export HOMEBREW_GITHUB_API_TOKEN="${LATCH_INSTALL_TOKEN}"
 
+  # Embed the token in the clone URL. brew honors HOMEBREW_GITHUB_API_TOKEN
+  # for its own API calls but does NOT pass it to git — git defaults to
+  # password auth and fails ("password authentication is not supported")
+  # against private GitHub repos. The token in URL form is what `brew tap`
+  # actually consumes for the underlying git clone.
+  tap_url="https://x-access-token:${LATCH_INSTALL_TOKEN}@github.com/${TAP_REPO_PATH}.git"
+
   if brew tap | grep -qx "${TAP}"; then
-    echo "Tap already installed: ${TAP} — refreshing to latest formula."
+    echo "Tap already installed: ${TAP} — refreshing remote and pulling latest formula."
+    # Make the existing clone authenticate. Idempotent: rewrites the URL
+    # whether or not it had a token before. On every run, the URL is set to
+    # whatever LATCH_INSTALL_TOKEN currently is — so token rotation just
+    # works on the next install-script invocation.
+    tap_dir="$(brew --repository "${TAP}")"
+    if [ -d "${tap_dir}" ]; then
+      git -C "${tap_dir}" remote set-url origin "${tap_url}"
+    fi
     brew update --quiet "${TAP}" || brew update --quiet
   else
-    brew tap "${TAP}" "${TAP_URL}"
+    brew tap "${TAP}" "${tap_url}"
   fi
 
   # Use `reinstall` instead of `install` so a stale or pinned local install

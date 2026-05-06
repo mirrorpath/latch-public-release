@@ -21,11 +21,13 @@ The script prompts for a tap PAT (one-time), taps `mirrorpath/latch`, and runs `
 #   Resource owner: mirrorpath
 #   Repository access: only mirrorpath/homebrew-latch
 #   Permissions: Contents = Read-only
-export HOMEBREW_GITHUB_API_TOKEN=<PAT>
+PAT=<your-pat>
 
-brew tap mirrorpath/latch https://github.com/mirrorpath/homebrew-latch.git
+brew tap mirrorpath/latch "https://x-access-token:${PAT}@github.com/mirrorpath/homebrew-latch.git"
 brew install latch
 ```
+
+The token must be embedded in the clone URL — `brew tap` does not consume `HOMEBREW_GITHUB_API_TOKEN` for the underlying git clone, so the env-var-only form fails with "password authentication is not supported."
 
 The tap clone needs the PAT (tap repo is private). The binary download pulls from this public release repo and needs no auth.
 
