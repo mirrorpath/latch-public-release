@@ -12,24 +12,16 @@ This repo exists so users can `brew install latch` (or `curl | bash`) without ne
 curl -fsSL https://raw.githubusercontent.com/mirrorpath/latch-public-release/main/install.sh | bash
 ```
 
-The script prompts for a tap PAT (one-time), taps `mirrorpath/latch`, and runs `brew install latch`.
+The script taps `mirrorpath/latch` and runs `brew install latch`. No auth, no env vars.
 
 ### Manual
 
 ```bash
-# Mint a fine-grained PAT at https://github.com/settings/personal-access-tokens
-#   Resource owner: mirrorpath
-#   Repository access: only mirrorpath/homebrew-latch
-#   Permissions: Contents = Read-only
-PAT=<your-pat>
-
-brew tap mirrorpath/latch "https://x-access-token:${PAT}@github.com/mirrorpath/homebrew-latch.git"
+brew tap mirrorpath/latch
 brew install latch
 ```
 
-The token must be embedded in the clone URL — `brew tap` does not consume `HOMEBREW_GITHUB_API_TOKEN` for the underlying git clone, so the env-var-only form fails with "password authentication is not supported."
-
-The tap clone needs the PAT (tap repo is private). The binary download pulls from this public release repo and needs no auth.
+Both the tap and the binaries are public — no PAT, no SSH key, no env vars required.
 
 ## Trust posture
 
@@ -55,10 +47,8 @@ curl -fsSL -O "https://github.com/mirrorpath/latch-public-release/releases/downl
 curl -fsSL -O "https://github.com/mirrorpath/latch-public-release/releases/download/${TAG}/checksums.txt"
 curl -fsSL -O "https://github.com/mirrorpath/latch-public-release/releases/download/${TAG}/checksums.txt.minisig"
 
-# Get the trust public key (bundled in the private tap; you'll need read access there
-# OR ask whoever shared latch with you to send you the key out of band).
-# If you have brew tap access:
-#   curl -fsSL -O "https://raw.githubusercontent.com/mirrorpath/homebrew-latch/main/Formula/latch-minisign.pub"
+# Get the trust public key (also public, bundled in the brew tap).
+curl -fsSL -O "https://raw.githubusercontent.com/mirrorpath/homebrew-latch/main/Formula/latch-minisign.pub"
 
 # Verify signature on the manifest.
 minisign -Vm checksums.txt -p latch-minisign.pub -x checksums.txt.minisig
