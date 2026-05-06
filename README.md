@@ -39,20 +39,41 @@ minisign -Vm checksums.txt -p latch-minisign.pub -x checksums.txt.minisig
 
 Install aborts on verification failure. The trust anchor is the bundled pubkey — anyone can download the binary, but only the holder of the matching private key can sign a release the formula will accept.
 
-## Verify a downloaded binary manually
+## Manual install (no brew required)
+
+For users who can't or don't want to use Homebrew:
 
 ```bash
-# Download archive + checksums + signature for your arch
-curl -fsSL -O https://github.com/mirrorpath/latch-public-release/releases/download/<TAG>/latch-<TAG>-<TARGET>.tar.gz
-curl -fsSL -O https://github.com/mirrorpath/latch-public-release/releases/download/<TAG>/checksums.txt
-curl -fsSL -O https://github.com/mirrorpath/latch-public-release/releases/download/<TAG>/checksums.txt.minisig
+# Pick the version and your target triple.
+TAG="v0.1.0-preview.1"
+TARGET="aarch64-apple-darwin"   # or x86_64-apple-darwin / aarch64-unknown-linux-gnu / x86_64-unknown-linux-gnu
 
-# Verify signature (requires the latch minisign pubkey — bundled in the tap)
+# Download the archive + signed manifest.
+curl -fsSL -O "https://github.com/mirrorpath/latch-public-release/releases/download/${TAG}/latch-${TAG}-${TARGET}.tar.gz"
+curl -fsSL -O "https://github.com/mirrorpath/latch-public-release/releases/download/${TAG}/checksums.txt"
+curl -fsSL -O "https://github.com/mirrorpath/latch-public-release/releases/download/${TAG}/checksums.txt.minisig"
+
+# Get the trust public key (bundled in the private tap; you'll need read access there
+# OR ask whoever shared latch with you to send you the key out of band).
+# If you have brew tap access:
+#   curl -fsSL -O "https://raw.githubusercontent.com/mirrorpath/homebrew-latch/main/Formula/latch-minisign.pub"
+
+# Verify signature on the manifest.
 minisign -Vm checksums.txt -p latch-minisign.pub -x checksums.txt.minisig
 
-# Verify archive integrity
+# Verify archive integrity matches the manifest.
 sha256sum --check --ignore-missing checksums.txt
+
+# Extract and install.
+tar -xzf "latch-${TAG}-${TARGET}.tar.gz"
+mkdir -p "${HOME}/.local/bin"
+install -m 0755 "latch-${TAG}-${TARGET}/latch" "${HOME}/.local/bin/latch"
+
+# Make sure ${HOME}/.local/bin is on PATH.
+latch --version
 ```
+
+This covers the platforms Homebrew doesn't reach (e.g., minimal Linux containers, distros without brew). The trust posture is identical to the brew install path — same minisign signature, same trust anchor.
 
 ## Source
 
